@@ -1,5 +1,7 @@
 from scrapy import Spider, Request
 import os
+import re
+from w3lib.html import remove_tags
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -25,10 +27,15 @@ class ProxySpider(Spider):
     }
 
     def start_requests(self):
-        yield Request(
-            "http://httpbin.org/get",
-            meta={"playwright": True},
-        )
+        for i in range(0, 200):
+            yield Request(
+                "http://httpbin.org/user-agent",
+                meta={"playwright": True, "playwright_include_page": True},
+                callback=self.parse,
+                dont_filter=True
+            )
 
-    def parse(self, response):
-        print(response.text)
+    async def parse(self, response):
+        page = response.meta["playwright_page"] # The page object that allows us to interact with the webpage
+        yield {"user-agent": re.findall(pattern="(?<=\"user-agent\": \")(.*)(?=\")", string=response.xpath("//pre/text()").get())[0]}
+        await page.close()
