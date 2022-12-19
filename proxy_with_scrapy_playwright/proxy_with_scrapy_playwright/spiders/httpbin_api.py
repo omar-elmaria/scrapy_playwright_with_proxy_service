@@ -21,12 +21,11 @@ class ProxyAPISpider(Spider):
     }
 
     def start_requests(self):
-        for i in range(0, 200):
-            yield Request(
-                client.scrapyGet(url="http://httpbin.org/get", country_code="de"),
-                callback=self.parse,
-                dont_filter=True
-            )
+        yield Request(
+            client.scrapyGet(url="http://httpbin.org/ip", country_code="de"),
+            callback=self.parse,
+            dont_filter=True
+        )
 
     def parse(self, response):
         print(response.text)    
